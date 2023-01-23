@@ -1,5 +1,5 @@
 {
-  "name": "express-typescript-service-skeleton",
+  "name": "nodejs-redis-cache-example",
   "version": "1.0.0",
   "description": "Skeleton for new typescript services based on hexagonal architecture",
   "main": "src/index.js",
@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlbertHernandez/express-typescript-service-skeleton.git"
+    "url": "git+https://github.com/AlbertHernandez/nodejs-redis-cache-example.git"
   },
   "keywords": [
     "typescript",
@@ -31,9 +31,9 @@
     "npm": ">=9.3.0"
   },
   "bugs": {
-    "url": "https://github.com/AlbertHernandez/express-typescript-service-skeleton/issues"
+    "url": "https://github.com/AlbertHernandez/nodejs-redis-cache-example/issues"
   },
-  "homepage": "https://github.com/AlbertHernandez/express-typescript-service-skeleton#readme",
+  "homepage": "https://github.com/AlbertHernandez/nodejs-redis-cache-example#readme",
   "devDependencies": {
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
