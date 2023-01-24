@@ -3,23 +3,32 @@ import { createClient } from "redis";
 type CacheValue = Record<string, unknown> | number | string | boolean;
 
 export class CacheManager {
-  private readonly redisClient;
-
+  private readonly client;
   constructor(url: string) {
-    this.redisClient = createClient({
+    this.client = createClient({
       url,
     });
-    this.redisClient.on("error", (error) => {
+    this.client.on("error", (error) => {
       console.error(`Redis client error`, error);
     });
   }
 
-  private async connect() {
-    await this.redisClient.connect();
+  async connectIfNecessary(): Promise<void> {
+    if (this.client.isReady) {
+      return;
+    }
+
+    await this.client.connect();
   }
 
-  private async quit() {
-    await this.redisClient.quit();
+  async isHealthy(): Promise<boolean> {
+    try {
+      await this.connectIfNecessary();
+      await this.client.ping();
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   async set(
@@ -27,39 +36,25 @@ export class CacheManager {
     value: CacheValue,
     options: { expirationInMs?: number } = {}
   ): Promise<void> {
-    try {
-      await this.connect();
+    await this.connectIfNecessary();
 
-      const stringifiedValue =
-        typeof value === "string"
-          ? value
-          : this.stringifyValueForStoring(value);
+    const stringifiedValue =
+      typeof value === "string" ? value : this.stringifyValueForStoring(value);
 
-      await this.redisClient.set(key, stringifiedValue, {
-        PX: options.expirationInMs,
-      });
-    } finally {
-      await this.quit();
-    }
+    await this.client.set(key, stringifiedValue, {
+      PX: options.expirationInMs,
+    });
   }
 
   async get(key: string): Promise<CacheValue | null> {
-    try {
-      await this.connect();
+    await this.connectIfNecessary();
+    const value = await this.client.get(key);
 
-      const value = await this.redisClient.get(key);
-
-      if (!value) {
-        return null;
-      }
-
-      return this.transformValueFromStorageFormat(value);
-    } catch (error) {
-      console.error("Error getting data from redis");
+    if (!value) {
       return null;
-    } finally {
-      await this.quit();
     }
+
+    return this.transformValueFromStorageFormat(value);
   }
 
   private stringifyValueForStoring(value: CacheValue): string {
